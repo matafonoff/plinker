@@ -11,7 +11,7 @@
     "dist/"
   ],
   "bin": {
-    "plinker": "dist/index.ts"
+    "plinker": "dist/index.js"
   },
   "devDependencies": {
     "@types/node": "^18.0.5",
