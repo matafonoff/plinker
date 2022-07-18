@@ -1,6 +1,6 @@
 {
   "name": "@xelberasw/plinker",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Simple package manager tool",
   "main": "dist/index.js",
   "author": "Steve Matafonov <sm@xelbera.com>",
