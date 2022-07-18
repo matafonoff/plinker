@@ -45,11 +45,11 @@ const linkCommand = new Command('link')
         const packages = await getPackages();
         //const g = new Graph<Package>();
 
-        // for (let pkg of packages) {
-        //     pkg.addDependenciesFrom(packages);
+        for (let pkg of packages) {
+            pkg.addDependenciesFrom(packages);
 
-        //     // g.addVertex(pkg);
-        // }
+            // g.addVertex(pkg);
+        }
 
         // const sorted = packages.sort((a, b) => b.links - a.links);
 
