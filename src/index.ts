@@ -7,7 +7,7 @@ import { join, dirname, resolve } from "path";
 import shelljs from 'shelljs';
 const { exec, which } = shelljs;
 
-function getRootFolder():string {
+function getRootFolder(): string {
     const options = program.opts();
 
     return options.root || cwd();
@@ -43,31 +43,32 @@ const runCommand = new Command('run')
 const linkCommand = new Command('link')
     .action(async () => {
         const packages = await getPackages();
-        const g = new Graph<Package>();
+        //const g = new Graph<Package>();
 
-        for (let pkg of packages) {
-            pkg.addDependenciesFrom(packages);
+        // for (let pkg of packages) {
+        //     pkg.addDependenciesFrom(packages);
 
-            g.addVertex(pkg);
-        }
+        //     // g.addVertex(pkg);
+        // }
 
-        const sorted = packages.sort((a, b) => b.links - a.links);
+        // const sorted = packages.sort((a, b) => b.links - a.links);
 
-        for (let pkg of sorted) {
-            for (let dep of pkg.refs) {
-                g.addEdge(pkg, dep);
-            }
-        }
+        // for (let pkg of sorted) {
+        //     for (let dep of pkg.refs) {
+        //         g.addEdge(pkg, dep);
+        //     }
+        // }
 
-        const mostUsed = sorted[0];
+        // const mostUsed = sorted[0];
 
-        const orderedByGraph: Package[] = [];
-        g.dfs(mostUsed, v => orderedByGraph.push(v));
+        // const orderedByGraph: Package[] = [];
+        // g.dfs(mostUsed, v => orderedByGraph.push(v));
         // check loops. Fail if any
 
         // console.log(sorted.map(x => `${x.name}, ${x.links}`));
         // console.log(orderedByGraph.map(x => `${x.name}, ${x.links}`));
-        await Promise.all(orderedByGraph.map(proj => proj.ensureLinks()));
+        // await Promise.all(orderedByGraph.map(proj => proj.ensureLinks()));
+        await Promise.all(packages.map(proj => proj.ensureLinks()));
     });
 
 const installDependencies = new Command('install-deps')
@@ -85,7 +86,7 @@ const installDependencies = new Command('install-deps')
             }
         }
 
-        if (packages.some(x=>x.hasPeerDependencies)) {
+        if (packages.some(x => x.hasPeerDependencies)) {
             const cwd = getRootFolder();
             const rootPackageFile = join(cwd, "package.json");
 
@@ -282,7 +283,7 @@ class Graph<T> {
     }
 
     dfs(startVertex: T, callback?: (vertex: T) => void) {
-        let list = this._vertices; // список смежности
+        const list = this._vertices; // список смежности
         let stack = [startVertex]; // стек вершин для перебора
         const visited: T[] = [startVertex];
 
@@ -310,7 +311,8 @@ class Graph<T> {
         }
 
         // проверка на изолированные фрагменты
-        stack = [...this._vertices.keys()];
+        stack.length = 0;
+        stack.push(...this._vertices.keys());
 
         while (stack.length) {
             let activeVertex = stack.pop()!;
