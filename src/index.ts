@@ -69,6 +69,15 @@ const linkCommand = new Command('link')
         // console.log(orderedByGraph.map(x => `${x.name}, ${x.links}`));
         // await Promise.all(orderedByGraph.map(proj => proj.ensureLinks()));
         await Promise.all(packages.map(proj => proj.ensureLinks()));
+
+        const cwd = getRootFolder();
+        const rootPackageFile = join(cwd, "package.json");
+
+        if ((await getStatSafe(rootPackageFile))?.isFile()) {
+            const p = new Package(rootPackageFile);
+            p.addDependenciesFrom(packages);
+            await p.ensureLinks();
+        }
     });
 
 const installDependencies = new Command('install-deps')
@@ -90,9 +99,11 @@ const installDependencies = new Command('install-deps')
             const cwd = getRootFolder();
             const rootPackageFile = join(cwd, "package.json");
 
-            const p = new Package(rootPackageFile);
-            console.log('>>> Installing root dependencies for ', p.name);
-            await p.ensureDependencies();
+            if ((await getStatSafe(rootPackageFile))?.isFile()) {
+                const p = new Package(rootPackageFile);
+                console.log('>>> Installing root dependencies for ', p.name);
+                await p.ensureDependencies();
+            }
         }
     });
 
@@ -160,20 +171,13 @@ export class Package {
 
     get hasPeerDependencies() { return Object.getOwnPropertyNames(this._fi.peerDependencies ?? {}).length > 0; }
 
-    private async getStatSafe(fullPath: string): Promise<fs.Stats | null> {
-        try {
-            return await fs.promises.stat(fullPath);
-        }
-        catch {
-            return null;
-        }
-    }
+
 
     async ensureDependencies() {
         return new Promise<boolean>(async (resolve, reject) => {
             const cwd = this.path;
             const yarnLock = join(cwd, 'yarn.lock');
-            const yarnLockStat = await this.getStatSafe(yarnLock);
+            const yarnLockStat = await getStatSafe(yarnLock);
             let command = 'npm install';
             if (yarnLockStat?.isFile()) {
                 if (!which('yarn')) {
@@ -197,7 +201,7 @@ export class Package {
 
     async ensureLinks() {
         const nodeModules = join(this.path, 'node_modules');
-        const stat = await this.getStatSafe(nodeModules);
+        const stat = await getStatSafe(nodeModules);
         if (!stat?.isDirectory()) {
             await fs.promises.mkdir(nodeModules);
         }
@@ -359,6 +363,15 @@ class Graph<T> {
                 handleVertex(activeVertex);
             }
         }
+    }
+}
+
+async function getStatSafe(fullPath: string): Promise<fs.Stats | null> {
+    try {
+        return await fs.promises.stat(fullPath);
+    }
+    catch {
+        return null;
     }
 }
 
